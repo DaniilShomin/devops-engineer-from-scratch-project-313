@@ -182,7 +182,7 @@ def delete_link(link_id: int):
 
 
 if __name__ == "__main__":
-    db_url = app.config["DATABASE_URL"]
+    db_url = app.config["DATABASE_URL"].replace("postgres://", "postgresql://", 1)
     init_db(db_url)
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
