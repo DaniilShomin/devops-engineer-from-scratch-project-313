@@ -10,3 +10,6 @@ lint:
 
 format:
 	uv run ruff format .
+
+dev:
+	npm run dev

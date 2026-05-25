@@ -124,7 +124,10 @@ def test_update_duplicate_short_name(client):
 
 def test_pagination_default(client):
     for i in range(12):
-        client.post("/api/links", json={"original_url": f"https://{i}.com", "short_name": f"s{i}"})
+        client.post(
+            "/api/links",
+            json={"original_url": f"https://{i}.com", "short_name": f"s{i}"},
+        )
 
     response = client.get("/api/links")
     assert response.status_code == 200
@@ -137,7 +140,10 @@ def test_pagination_default(client):
 
 def test_pagination_range(client):
     for i in range(12):
-        client.post("/api/links", json={"original_url": f"https://{i}.com", "short_name": f"s{i}"})
+        client.post(
+            "/api/links",
+            json={"original_url": f"https://{i}.com", "short_name": f"s{i}"},
+        )
 
     response = client.get("/api/links?range=[5,10]")
     assert response.status_code == 200
@@ -184,7 +190,9 @@ def test_cors_headers_on_api(client):
         },
     )
     assert response.status_code == 200
-    assert response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    assert (
+        response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    )
     assert "GET" in response.headers.get("Access-Control-Allow-Methods", "")
 
 
@@ -194,5 +202,7 @@ def test_cors_headers_on_regular_request(client):
         headers={"Origin": "http://localhost:5173"},
     )
     assert response.status_code == 200
-    assert response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    assert (
+        response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    )
     assert response.headers.get("Access-Control-Expose-Headers", "") == "Content-Range"
