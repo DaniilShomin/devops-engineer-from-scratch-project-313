@@ -1,9 +1,11 @@
+import json
 import os
 
 import sentry_sdk
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
@@ -40,6 +42,27 @@ def link_to_dict(link: Link) -> dict:
     }
 
 
+def parse_range():
+    range_param = request.args.get("range", "[0,10]")
+    try:
+        range_list = json.loads(range_param)
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+    if (
+        not isinstance(range_list, list)
+        or len(range_list) != 2
+        or not isinstance(range_list[0], int)
+        or not isinstance(range_list[1], int)
+        or range_list[0] < 0
+        or range_list[1] < 0
+        or range_list[0] > range_list[1]
+    ):
+        return None
+
+    return range_list[0], range_list[1]
+
+
 @app.route("/ping")
 def ping():
     return "pong"
@@ -53,10 +76,22 @@ def trigger_error():
 
 @app.route("/api/links", methods=["GET"])
 def list_links():
+    parsed = parse_range()
+    if parsed is None:
+        return jsonify({"error": "Invalid range"}), 400
+
+    start, end = parsed
+    limit = end - start
+
     session = get_session()
-    links = session.exec(select(Link)).all()
+    total = session.scalar(select(func.count()).select_from(Link)) or 0
+    links = session.exec(select(Link).offset(start).limit(limit)).all()
     session.close()
-    return jsonify([link_to_dict(link) for link in links]), 200
+
+    content_range = f"links {start}-{end}/{total}"
+    response = jsonify([link_to_dict(link) for link in links])
+    response.headers["Content-Range"] = content_range
+    return response, 200
 
 
 @app.route("/api/links", methods=["POST"])

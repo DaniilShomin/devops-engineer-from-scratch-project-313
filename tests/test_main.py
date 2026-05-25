@@ -120,3 +120,56 @@ def test_update_duplicate_short_name(client):
     )
     assert response.status_code == 422
     assert response.get_json() == {"error": "short_name must be unique"}
+
+
+def test_pagination_default(client):
+    for i in range(12):
+        client.post("/api/links", json={"original_url": f"https://{i}.com", "short_name": f"s{i}"})
+
+    response = client.get("/api/links")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 10
+    assert data[0]["short_name"] == "s0"
+    assert data[9]["short_name"] == "s9"
+    assert response.headers["Content-Range"] == "links 0-10/12"
+
+
+def test_pagination_range(client):
+    for i in range(12):
+        client.post("/api/links", json={"original_url": f"https://{i}.com", "short_name": f"s{i}"})
+
+    response = client.get("/api/links?range=[5,10]")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert len(data) == 5
+    assert data[0]["short_name"] == "s5"
+    assert data[4]["short_name"] == "s9"
+    assert response.headers["Content-Range"] == "links 5-10/12"
+
+
+def test_pagination_empty_result(client):
+    client.post("/api/links", json={"original_url": "https://a.com", "short_name": "a"})
+    response = client.get("/api/links?range=[10,20]")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data == []
+    assert response.headers["Content-Range"] == "links 10-20/1"
+
+
+def test_pagination_invalid_range(client):
+    response = client.get("/api/links?range=abc")
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid range"}
+
+
+def test_pagination_negative_range(client):
+    response = client.get("/api/links?range=[-1,5]")
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid range"}
+
+
+def test_pagination_start_greater_than_end(client):
+    response = client.get("/api/links?range=[10,5]")
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid range"}
