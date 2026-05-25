@@ -1,6 +1,9 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/DaniilShomin/devops-engineer-from-scratch-project-313/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/DaniilShomin/devops-engineer-from-scratch-project-313/actions)
 
+### CI Status:
+[![CI](https://github.com/DaniilShomin/devops-engineer-from-scratch-project-313/actions/workflows/ci.yml/badge.svg)](https://github.com/DaniilShomin/devops-engineer-from-scratch-project-313/actions)
+
 ## Запуск
 
 Приложение использует [uv](https://docs.astral.sh/uv/) для управления зависимостями.

@@ -1,0 +1,9 @@
+target-version = "py313"
+line-length = 88
+
+[lint]
+select = ["E", "F"]
+ignore = []
+
+[lint.pydocstyle]
+convention = "google"
