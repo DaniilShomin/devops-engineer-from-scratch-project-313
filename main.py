@@ -4,6 +4,7 @@ import os
 import sentry_sdk
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -14,6 +15,14 @@ from database import Link, get_session, init_db
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(
+    app,
+    origins=["http://localhost:5173"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Content-Range"],
+    expose_headers=["Content-Range"],
+)
 
 sentry_dsn = os.environ.get("SENTRY_DSN")
 if sentry_dsn:

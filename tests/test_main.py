@@ -173,3 +173,26 @@ def test_pagination_start_greater_than_end(client):
     response = client.get("/api/links?range=[10,5]")
     assert response.status_code == 400
     assert response.get_json() == {"error": "Invalid range"}
+
+
+def test_cors_headers_on_api(client):
+    response = client.options(
+        "/api/links",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    assert "GET" in response.headers.get("Access-Control-Allow-Methods", "")
+
+
+def test_cors_headers_on_regular_request(client):
+    response = client.get(
+        "/api/links",
+        headers={"Origin": "http://localhost:5173"},
+    )
+    assert response.status_code == 200
+    assert response.headers.get("Access-Control-Allow-Origin") == "http://localhost:5173"
+    assert response.headers.get("Access-Control-Expose-Headers", "") == "Content-Range"
