@@ -23,3 +23,24 @@ curl http://localhost:8080/ping
 ```
 
 Ожидаемый ответ: `pong`
+
+## Деплой
+
+Приложение развёрнуто на Render:
+
+**URL:** https://devops-engineer-from-scratch-project-313.onrender.com
+
+### Локальный запуск через Docker
+
+```bash
+docker build -t devops-app .
+docker run -p 8080:8080 -e PORT=8080 devops-app
+```
+
+### Переменные окружения
+
+| Переменная | Описание | Обязательная |
+|------------|----------|--------------|
+| `PORT` | Порт, на котором запускается приложение | Нет (по умолчанию 8080) |
+| `SENTRY_DSN` | DSN для мониторинга ошибок в Sentry | Нет |
+| `DATABASE_URL` | URL базы данных | Нет |
