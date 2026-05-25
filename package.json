@@ -1,0 +1,11 @@
+{
+  "name": "devops-engineer-from-scratch-project-313",
+  "private": true,
+  "devDependencies": {
+    "@hexlet/project-devops-deploy-crud-frontend": "latest",
+    "concurrently": "^8.2.2"
+  },
+  "scripts": {
+    "dev": "concurrently \"npx start-hexlet-devops-deploy-crud-frontend\" \"uv run python main.py\""
+  }
+}
