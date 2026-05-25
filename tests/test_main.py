@@ -55,7 +55,7 @@ def test_get_link(client):
 def test_get_link_not_found(client):
     response = client.get("/api/links/999")
     assert response.status_code == 404
-    assert response.get_json() == {"error": "Not found"}
+    assert response.get_json() == {"detail": "Not found"}
 
 
 def test_update_link(client):
@@ -108,7 +108,7 @@ def test_duplicate_short_name(client):
         json={"original_url": "https://b.com", "short_name": "dup"},
     )
     assert response.status_code == 422
-    assert response.get_json() == {"error": "short_name must be unique"}
+    assert response.get_json() == {"detail": "short_name must be unique"}
 
 
 def test_update_duplicate_short_name(client):
@@ -119,7 +119,7 @@ def test_update_duplicate_short_name(client):
         json={"short_name": "b"},
     )
     assert response.status_code == 422
-    assert response.get_json() == {"error": "short_name must be unique"}
+    assert response.get_json() == {"detail": "short_name must be unique"}
 
 
 def test_pagination_default(client):
@@ -166,19 +166,19 @@ def test_pagination_empty_result(client):
 def test_pagination_invalid_range(client):
     response = client.get("/api/links?range=abc")
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Invalid range"}
+    assert response.get_json() == {"detail": "Invalid range"}
 
 
 def test_pagination_negative_range(client):
     response = client.get("/api/links?range=[-1,5]")
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Invalid range"}
+    assert response.get_json() == {"detail": "Invalid range"}
 
 
 def test_pagination_start_greater_than_end(client):
     response = client.get("/api/links?range=[10,5]")
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Invalid range"}
+    assert response.get_json() == {"detail": "Invalid range"}
 
 
 def test_cors_headers_on_api(client):

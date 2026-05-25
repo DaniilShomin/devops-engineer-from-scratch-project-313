@@ -87,7 +87,7 @@ def trigger_error():
 def list_links():
     parsed = parse_range()
     if parsed is None:
-        return jsonify({"error": "Invalid range"}), 400
+        return jsonify({"detail": "Invalid range"}), 400
 
     start, end = parsed
     limit = end - start
@@ -109,8 +109,13 @@ def create_link():
     original_url = data.get("original_url")
     short_name = data.get("short_name")
 
-    if not original_url or not short_name:
-        return jsonify({"error": "original_url and short_name are required"}), 422
+    detail = []
+    if not original_url:
+        detail.append({"loc": ["body", "original_url"], "msg": "field required"})
+    if not short_name:
+        detail.append({"loc": ["body", "short_name"], "msg": "field required"})
+    if detail:
+        return jsonify({"detail": detail}), 422
 
     link = Link(original_url=original_url, short_name=short_name)
     session = get_session()
@@ -120,7 +125,7 @@ def create_link():
         session.refresh(link)
     except IntegrityError:
         session.rollback()
-        return jsonify({"error": "short_name must be unique"}), 422
+        return jsonify({"detail": "short_name must be unique"}), 422
     finally:
         session.close()
 
@@ -133,7 +138,7 @@ def get_link(link_id: int):
     link = session.get(Link, link_id)
     session.close()
     if not link:
-        return jsonify({"error": "Not found"}), 404
+        return jsonify({"detail": "Not found"}), 404
     return jsonify(link_to_dict(link)), 200
 
 
@@ -143,9 +148,11 @@ def update_link(link_id: int):
     link = session.get(Link, link_id)
     if not link:
         session.close()
-        return jsonify({"error": "Not found"}), 404
+        return jsonify({"detail": "Not found"}), 404
 
     data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"detail": {"msg": "Invalid JSON body"}}), 422
     original_url = data.get("original_url")
     short_name = data.get("short_name")
 
@@ -160,7 +167,7 @@ def update_link(link_id: int):
         session.refresh(link)
     except IntegrityError:
         session.rollback()
-        return jsonify({"error": "short_name must be unique"}), 422
+        return jsonify({"detail": "short_name must be unique"}), 422
     finally:
         session.close()
 
@@ -173,7 +180,7 @@ def delete_link(link_id: int):
     link = session.get(Link, link_id)
     if not link:
         session.close()
-        return jsonify({"error": "Not found"}), 404
+        return jsonify({"detail": "Not found"}), 404
 
     session.delete(link)
     session.commit()
